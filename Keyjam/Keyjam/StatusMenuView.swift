@@ -3,13 +3,13 @@ import SwiftUI
 
 struct StatusMenuView: View {
   @State private var launchAtLogin = false
-  
+
   var body: some View {
     VStack {
       Text("Status Menu View")
-      
+
       Divider()
-      
+
       Section("Settings") {
         Toggle("Launch Make me Stand at Login (toggle)", isOn: $launchAtLogin)
           .onChange(of: launchAtLogin) { previousValue, newValue in
@@ -33,6 +33,12 @@ struct StatusMenuView: View {
             launchAtLogin = (SMAppService.mainApp.status == .enabled)
           }
       }
+
+      Divider()
+
+      Button("Quit") {
+        NSApplication.shared.terminate(nil)
+      }.keyboardShortcut("q")
     }
     .padding()
   }
