@@ -4,6 +4,11 @@ import CoreGraphics
 import Foundation
 
 class StreakTracker {
+  enum StreakContext {
+    case all
+    case apps(named: [String])
+  }
+
   enum StreakInEvent {
     case commonKeyPress
     case shortcutKeyPress
@@ -18,6 +23,7 @@ class StreakTracker {
   }
 
   let repository: StreakRepository
+  var context: StreakContext = .all
   var mouseEventTap: CFMachPort?
   var keyEventTap: CFMachPort?
 
@@ -40,18 +46,34 @@ class StreakTracker {
       .sink(
         receiveCompletion: { _ in },
         receiveValue: { value in
-          switch value {
-          case .commonKeyPress, .shortcutKeyPress:
-            self.repository.keyCount += 1
-            self.streakOutEventPublisher.send(.increased)
-            break
-          case .mouseMoveStarted:
-            if self.repository.keyCount > 0 {
-              let keyCount = self.repository.keyCount
-              self.repository.keyCount = 0
-              self.repository.mouseBreak += 1
-              self.streakOutEventPublisher.send(.mouseBrokeStreak(keyCount: keyCount))
-              self.streakOutEventPublisher.send(.reset)
+          var shouldCount = false
+
+          switch self.context {
+          case .all:
+            shouldCount = true
+          case .apps(let appNames):
+            let foregroundAppName = self.getForegroundAppName()
+            if appNames.contains(where: {
+              foregroundAppName == $0
+            }) {
+              shouldCount = true
+            }
+          }
+
+          if shouldCount {
+            switch value {
+            case .commonKeyPress, .shortcutKeyPress:
+              self.repository.keyCount += 1
+              self.streakOutEventPublisher.send(.increased)
+              break
+            case .mouseMoveStarted:
+              if self.repository.keyCount > 0 {
+                let keyCount = self.repository.keyCount
+                self.repository.keyCount = 0
+                self.repository.mouseBreak += 1
+                self.streakOutEventPublisher.send(.mouseBrokeStreak(keyCount: keyCount))
+                self.streakOutEventPublisher.send(.reset)
+              }
             }
           }
         }
@@ -132,4 +154,30 @@ class StreakTracker {
       CFRunLoopGetCurrent(), runLoopSource, .commonModes)
     CGEvent.tapEnable(tap: eventTap, enable: true)
   }
+
+  private func getForegroundAppName() -> String? {
+    var activeAppName: String?
+
+    let options = CGWindowListOption(arrayLiteral: .optionOnScreenOnly, .optionIncludingWindow)
+
+    // Retrieve the window list
+    guard let windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as NSArray? else {
+      return nil
+    }
+
+    for entry in windowList {
+      if let window = entry as? NSDictionary,
+        let isOnScreen = window[kCGWindowIsOnscreen] as? Bool,
+        let layer = window[kCGWindowLayer] as? Int,
+        let ownerName = window[kCGWindowOwnerName] as? String,
+        isOnScreen && layer == 0
+      {  // Filter for foreground, user-facing window
+        activeAppName = ownerName  // Return the app name
+        break
+      }
+    }
+
+    return activeAppName
+  }
+
 }

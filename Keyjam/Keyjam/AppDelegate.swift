@@ -46,6 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       }
       .store(in: &subscriptions)
 
+    streakTracker.context = .apps(named: ["Xcode", "Terminal", "Ghostty", "Visual Studio Code"])
     self.streakTracker = streakTracker
   }
 }
