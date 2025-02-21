@@ -2,9 +2,9 @@ import SwiftUI
 
 @main
 struct KeyjamApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+  var body: some Scene {
+    WindowGroup {
+      ContentView()
     }
+  }
 }
