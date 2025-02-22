@@ -37,11 +37,11 @@ struct KeyjamMenuBar: Scene {
         Text("Usage")
           .font(.headline)
 
-        Text("Currently counting sequential keystrokes.  Using mouse will reset streak + play sad sound.")
+        Text("Currently counting sequential keystrokes.  Using mouse will reset streak, and if >15 streak play a sad sound.")
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        Text("Applications Filter")
+        Text("Applications include filter")
           .font(.headline)
 
         if !trackedApps.isEmpty {
@@ -56,6 +56,7 @@ struct KeyjamMenuBar: Scene {
                 Image(systemName: "xmark.circle.fill")
                   .foregroundColor(.red)
               }
+              .buttonStyle(.plain)
             }
           }
         }
@@ -67,15 +68,19 @@ struct KeyjamMenuBar: Scene {
               addApp()
             })
 
-          Button("Add") {
+          Button(action: {
             addApp()
+          }) {
+            Image(systemName: "plus.circle.fill")
+              .foregroundColor(.green)
           }
+          .buttonStyle(.plain)
           .disabled(newAppName.isEmpty)
         }
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        Text("More Options")
+        Text("Options")
           .font(.headline)
 
         Toggle("Launch automatically at login", isOn: $launchAtLogin)
@@ -104,7 +109,7 @@ struct KeyjamMenuBar: Scene {
 
         HStack {
           VStack {
-            Text("KeyJam version \(appVersion)")
+            Text("Keyjam version \(appVersion)")
               .font(.headline)
           }
           Spacer()

@@ -8,7 +8,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   var subscriptions: Set<AnyCancellable> = []
 
   func applicationDidFinishLaunching(_ notification: Notification) {
-    print("applicationDidFinishLaunching")
     if !ProcessInfo.processInfo.isExecutingInXcodeSwiftUIPreview {
       preloadAudio()
       initializeStreakTracker()
