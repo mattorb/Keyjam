@@ -10,6 +10,10 @@ struct KeyjamMenuBar: Scene {
   @State private var newAppName: String = ""
   @AppStorage("trackedApps") private var trackedApps: [String] = []
 
+  enum Layout {
+    public static let verticalSpacer: CGFloat = 20.0
+  }
+
   var appVersion: String {
     guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
       let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
@@ -23,33 +27,19 @@ struct KeyjamMenuBar: Scene {
   var body: some Scene {
     MenuBarExtra {
       VStack(alignment: .leading) {
-        Text("KeyJam")
-          .font(.headline)
-
-        Text(streakTracker.state == .started ? "Initialized successfully." : "Issue initializing.  Check permissions & relaunch.")
-          .font(.caption)
-
-        Spacer()
-
         Text("Statistics")
           .font(.headline)
 
         Text("Current key streak: \(keyCount.keyCount)")
 
-        Spacer()
+        Spacer(minLength: Layout.verticalSpacer)
 
         Text("Usage")
           .font(.headline)
 
-        if case .all = streakTracker.context {
-          Text("Currently counting all sequential keystrokes from all applications.  Using the mouse will reset the streak.")
-        } else {
-          Text(
-            "Currently counting sequential keystrokes from selected applications.  Using the mouse while one of those apps is selected will reset the streak."
-          )
-        }
+        Text("Currently counting sequential keystrokes.  Using mouse will reset streak + play sad sound.")
 
-        Spacer()
+        Spacer(minLength: Layout.verticalSpacer)
 
         Text("Applications Filter")
           .font(.headline)
@@ -83,7 +73,7 @@ struct KeyjamMenuBar: Scene {
           .disabled(newAppName.isEmpty)
         }
 
-        Spacer()
+        Spacer(minLength: Layout.verticalSpacer)
 
         Text("More Options")
           .font(.headline)
@@ -110,20 +100,25 @@ struct KeyjamMenuBar: Scene {
             launchAtLogin = (SMAppService.mainApp.status == .enabled)
           }
 
-        Spacer()
+        Spacer(minLength: Layout.verticalSpacer)
 
         HStack {
-          Text("KeyJam version \(appVersion)")
+          VStack {
+            Text("KeyJam version \(appVersion)")
+              .font(.headline)
+          }
           Spacer()
           Button("Quit") {
             NSApplication.shared.terminate(nil)
           }.keyboardShortcut("q")
             .padding()
         }
+
       }
       .padding()
     } label: {
-      Text("⌨️ \(keyCount.keyCount)")
+      Image(systemName: "keyboard")
+      Text("\(keyCount.keyCount)")
     }
     .menuBarExtraStyle(.window)
   }
