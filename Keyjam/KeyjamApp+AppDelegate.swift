@@ -4,11 +4,11 @@ import Combine
 import Foundation
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-  var streakTracker: StreakTracker?
   var mouseBreakAudio: AVAudioPlayer?
   var subscriptions: Set<AnyCancellable> = []
 
   func applicationDidFinishLaunching(_ notification: Notification) {
+    print("applicationDidFinishLaunching")
     if !ProcessInfo.processInfo.isExecutingInXcodeSwiftUIPreview {
       preloadAudio()
       initializeStreakTracker()
@@ -25,9 +25,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
-  @MainActor
   private func initializeStreakTracker() {
-    let streakTracker = StreakTracker(repository: StreakRepository.shared)
+    guard let streakTracker = DependencyContainer.shared.resolve(type: StreakTracker.self) else {
+      fatalError("Error initializing")
+    }
+
+    streakTracker.start()
+
     streakTracker.streakOutEventPublisher
       .receive(on: DispatchQueue.main)
       .sink { _ in
@@ -37,17 +41,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
           break
         case .mouseBrokeStreak(let keyCount):
           if keyCount > 15 {
-            Task {
-              self.mouseBreakAudio?.volume = 0.1
-              self.mouseBreakAudio?.play()
-            }
+            self.mouseBreakAudio?.volume = 0.1
+            self.mouseBreakAudio?.play()
           }
         }
       }
       .store(in: &subscriptions)
-
-    streakTracker.context = .apps(named: ["Xcode", "Terminal", "Ghostty", "Visual Studio Code"])
-    self.streakTracker = streakTracker
   }
 }
 

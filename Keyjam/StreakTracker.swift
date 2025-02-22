@@ -3,7 +3,13 @@ import Combine
 import CoreGraphics
 import Foundation
 
+@Observable
 class StreakTracker {
+  enum InitializationState {
+    case stopped
+    case started
+  }
+
   enum StreakContext {
     case all
     case apps(named: [String])
@@ -22,22 +28,38 @@ class StreakTracker {
     case mouseBrokeStreak(keyCount: Int)
   }
 
+  @ObservationIgnored
   let repository: StreakRepository
+
+  @ObservationIgnored
   var context: StreakContext = .all
+
+  @ObservationIgnored
   var mouseEventTap: CFMachPort?
+
+  @ObservationIgnored
   var keyEventTap: CFMachPort?
 
+  @ObservationIgnored
   let streakInEventPublisher = PassthroughSubject<StreakInEvent, Never>()
+
+  @ObservationIgnored
   let streakOutEventPublisher = PassthroughSubject<StreakOutEvent, Never>()
 
-  // Persistent subscription reference
+  @ObservationIgnored
   var subscriptions: [AnyCancellable] = []
+
+  var state: InitializationState = .stopped
 
   init(repository: StreakRepository) {
     self.repository = repository
+  }
+
+  func start() {
     setupMouseMovementTap()
     setupGlobalKeyTap()
     startListeningToEvents()
+    state = .started
   }
 
   func startListeningToEvents() {
@@ -81,6 +103,10 @@ class StreakTracker {
       .store(in: &subscriptions)
   }
 
+  func updateContext(appNames: [String]) {
+    self.context = appNames.isEmpty ? .all : .apps(named: appNames)
+  }
+
   func setupMouseMovementTap() {
     let eventMask: CGEventMask =
       (1 << CGEventType.mouseMoved.rawValue) | (1 << CGEventType.leftMouseDragged.rawValue) | (1 << CGEventType.rightMouseDragged.rawValue)
@@ -103,8 +129,7 @@ class StreakTracker {
         userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
       )
     else {
-      print("Failed to create mouse event tap")
-      return
+      fatalError("Failed to create mouse event tap")
     }
 
     self.mouseEventTap = eventTap
@@ -179,5 +204,4 @@ class StreakTracker {
 
     return activeAppName
   }
-
 }

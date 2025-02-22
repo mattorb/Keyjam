@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 
+// Enable storing a [String] via @AppStorage
 extension Array: @retroactive RawRepresentable where Element: Codable {
   public init?(rawValue: String) {
     guard let data = rawValue.data(using: .utf8),
