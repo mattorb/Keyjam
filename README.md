@@ -1,6 +1,6 @@
 # Keyjam
 
-Ever notice how satisfying it feels when you're absolutely crushing it on the keyboard like a maestro on the keys? That smooth flow when you're navigating, coding, or writing without reaching for the mouse? 
+Ever notice how satisfying it feels when you're absolutely crushing it on the [computer] keyboard, like a maestro on the keys? That smooth flow when you're navigating, coding, or writing without reaching for the mouse? 
 
 Keyjam is a macOS status menu app that tracks your keyboard streaks, encouraging you to use your keyboard more and your mouse less.
 
