@@ -39,7 +39,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case .decreased, .increased, .reset:
           break
         case .mouseBrokeStreak(let keyCount):
-          if keyCount > 15 {
+          if keyCount > 15,
+            !UserDefaults.standard.bool(forKey: Settings.disableStreakBrokenSound)
+          {
             self.mouseBreakAudio?.volume = 0.1
             self.mouseBreakAudio?.play()
           }

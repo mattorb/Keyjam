@@ -9,6 +9,7 @@ struct KeyjamMenuBar: Scene {
   @State private var launchAtLogin = false
   @State private var newAppName: String = ""
   @AppStorage(Settings.trackedApps) private var trackedApps: [String] = []
+  @AppStorage(Settings.disableStreakBrokenSound) private var disableStreakBrokenSound: Bool = false
 
   enum Layout {
     public static let verticalSpacer: CGFloat = 20.0
@@ -89,6 +90,8 @@ struct KeyjamMenuBar: Scene {
             get: { coordinator.isEnabled },
             set: { coordinator.isEnabled = $0 }
           ))
+
+        Toggle("Disable streak broken sound", isOn: $disableStreakBrokenSound)
 
         Toggle("Launch automatically at login", isOn: $launchAtLogin)
           .onChange(of: launchAtLogin) { previousValue, newValue in
