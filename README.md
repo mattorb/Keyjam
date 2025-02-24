@@ -1,16 +1,16 @@
 # Keyjam
 
-Keyjam tracks your keyboard "streaks" when you're in the flow, encouraging you to use your keyboard more and your mouse less.
-
-## What's the Jam?
-
 Ever notice how satisfying it feels when you're absolutely crushing it on the keyboard like a maestro on the keys? That smooth flow when you're navigating, coding, or writing without reaching for the mouse? 
+
+Keyjam is a macOS status menu app that tracks your keyboard streaks, encouraging you to use your keyboard more and your mouse less.
+
+![KJ_shot1](https://github.com/user-attachments/assets/e9bd7f27-556e-4edf-9985-384b04a1afcf)
 
 ## Features
 
-- macOS menubar app
-- Counts your key 'streak' as it happens.  If you use the mouse, it breaks the streak.  Sad sound triggers when you break an extended streak.
-- Push yourself to learn keyboard shortcuts for everything and navigating between apps -or- focus/filter to only specific apps if that is your jam
+- macOS status menu app
+- Counts your key 'streak' as it happens.  If you use the mouse, that breaks the streak.
+- Push yourself to learn keyboard shortcuts for system wide (resize windows, app switching/navigation, all apps), -OR- focus/filter to only specific apps if that is more your jam
 
 ## License
 
