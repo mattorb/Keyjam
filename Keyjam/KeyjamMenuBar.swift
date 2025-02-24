@@ -8,7 +8,7 @@ struct KeyjamMenuBar: Scene {
 
   @State private var launchAtLogin = false
   @State private var newAppName: String = ""
-  @AppStorage("trackedApps") private var trackedApps: [String] = []
+  @AppStorage(Settings.trackedApps) private var trackedApps: [String] = []
 
   enum Layout {
     public static let verticalSpacer: CGFloat = 20.0

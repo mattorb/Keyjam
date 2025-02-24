@@ -56,6 +56,10 @@ class StreakTracker {
   }
 
   func start() {
+    if let apps = UserDefaults.standard.decodedStringArray(forKey: Settings.trackedApps) {
+      self.updateContext(appNames: apps)
+    }
+
     setupMouseMovementTap()
     setupGlobalKeyTap()
     startListeningToEvents()
@@ -70,32 +74,31 @@ class StreakTracker {
         receiveValue: { value in
           var shouldCount = false
 
-          switch self.context {
-          case .all:
-            shouldCount = true
-          case .apps(let appNames):
-            let foregroundAppName = self.getForegroundAppName()
-            if appNames.contains(where: {
-              foregroundAppName == $0
-            }) {
+          switch value {
+          case .commonKeyPress, .shortcutKeyPress:
+            switch self.context {
+            case .all:
               shouldCount = true
+            case .apps(let appNames):
+              let foregroundAppName = self.getForegroundAppName()
+              //print("Foreground app name: \(foregroundAppName ?? "")")
+              if appNames.contains(where: {
+                foregroundAppName == $0
+              }) {
+                shouldCount = true
+              }
             }
-          }
-
-          if shouldCount {
-            switch value {
-            case .commonKeyPress, .shortcutKeyPress:
+            if shouldCount {
               self.repository.keyCount += 1
               self.streakOutEventPublisher.send(.increased)
-              break
-            case .mouseMoveStarted:
-              if self.repository.keyCount > 0 {
-                let keyCount = self.repository.keyCount
-                self.repository.keyCount = 0
-                self.repository.mouseBreak += 1
-                self.streakOutEventPublisher.send(.mouseBrokeStreak(keyCount: keyCount))
-                self.streakOutEventPublisher.send(.reset)
-              }
+            }
+          case .mouseMoveStarted:
+            if self.repository.keyCount > 0 {
+              let keyCount = self.repository.keyCount
+              self.repository.keyCount = 0
+              self.repository.mouseBreak += 1
+              self.streakOutEventPublisher.send(.mouseBrokeStreak(keyCount: keyCount))
+              self.streakOutEventPublisher.send(.reset)
             }
           }
         }
