@@ -25,13 +25,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   private func initializeStreakTracker() {
-    guard let streakTracker = DependencyContainer.shared.resolve(type: StreakTracker.self) else {
+    guard let coordinator = DependencyContainer.shared.resolve(type: StreakCoordinator.self) else {
       fatalError("Error initializing")
     }
 
-    streakTracker.start()
+    coordinator.start()
 
-    streakTracker.streakOutEventPublisher
+    coordinator.streakOutEventPublisher
       .receive(on: DispatchQueue.main)
       .sink { _ in
       } receiveValue: { event in

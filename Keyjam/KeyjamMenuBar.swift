@@ -4,7 +4,7 @@ import SwiftUI
 
 struct KeyjamMenuBar: Scene {
   @Environment(StreakRepository.self) var keyCount
-  @Environment(StreakTracker.self) var streakTracker
+  @Environment(StreakCoordinator.self) var coordinator
 
   @State private var launchAtLogin = false
   @State private var newAppName: String = ""
@@ -51,7 +51,7 @@ struct KeyjamMenuBar: Scene {
               Spacer()
               Button(action: {
                 trackedApps.removeAll { $0 == app }
-                streakTracker.updateContext(appNames: trackedApps)
+                coordinator.updateContext(appNames: trackedApps)
               }) {
                 Image(systemName: "xmark.circle.fill")
                   .foregroundColor(.red)
@@ -131,7 +131,7 @@ struct KeyjamMenuBar: Scene {
   private func addApp() {
     if !newAppName.isEmpty && !trackedApps.contains(newAppName) {
       trackedApps.append(newAppName)
-      streakTracker.updateContext(appNames: trackedApps)
+      coordinator.updateContext(appNames: trackedApps)
       newAppName = ""
     }
   }

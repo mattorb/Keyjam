@@ -15,6 +15,6 @@ struct KeyjamApp: App {
   var body: some Scene {
     KeyjamMenuBar()
       .environment(StreakRepository.self, from: container)
-      .environment(StreakTracker.self, from: container)
+      .environment(StreakCoordinator.self, from: container)
   }
 }

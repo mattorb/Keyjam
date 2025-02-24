@@ -21,7 +21,7 @@ class DependencyContainer {
   }
 }
 
-// Adapter to easily inject via environment of Scene at app root
+// Easily inject via environment of Scene at app root
 extension Scene {
   /// Inject dependency from container via SwiftUI to enable @Environment style lookup
   func environment<T: AnyObject & Observable>(_ type: T.Type, from container: DependencyContainer) -> some Scene {
