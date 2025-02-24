@@ -83,6 +83,13 @@ struct KeyjamMenuBar: Scene {
         Text("Options")
           .font(.headline)
 
+        Toggle(
+          "Key counting enabled",
+          isOn: .init(
+            get: { coordinator.isEnabled },
+            set: { coordinator.isEnabled = $0 }
+          ))
+
         Toggle("Launch automatically at login", isOn: $launchAtLogin)
           .onChange(of: launchAtLogin) { previousValue, newValue in
             if newValue, !previousValue {

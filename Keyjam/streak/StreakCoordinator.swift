@@ -36,6 +36,18 @@ final class StreakCoordinator {
 
   var state: InitializationState = .stopped
 
+  var isEnabled: Bool = true {
+    didSet {
+      if isEnabled {
+        keyboardMonitor.start()
+        mouseMonitor.start()
+      } else {
+        keyboardMonitor.stop()
+        mouseMonitor.stop()
+      }
+    }
+  }
+
   init(
     repository: StreakRepository, keyboardMonitor: InputMonitor = KeyboardMonitor(), mouseMonitor: InputMonitor = MouseMonitor(),
     appProvider: ActiveAppProvider = WindowSystemAppProvider()

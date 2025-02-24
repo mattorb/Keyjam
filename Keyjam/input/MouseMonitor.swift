@@ -37,4 +37,9 @@ class MouseMonitor: InputMonitor {
       CFRunLoopGetCurrent(), runLoopSource, .commonModes)
     CGEvent.tapEnable(tap: eventTap, enable: true)
   }
+
+  func stop() {
+    guard let eventTap = eventTap else { return }
+    CGEvent.tapEnable(tap: eventTap, enable: false)
+  }
 }
