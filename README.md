@@ -10,6 +10,8 @@ Keyjam is a macOS status menu app that tracks your keyboard streaks, encouraging
 
 - macOS status menu app
 - Counts your key 'streak' as it happens.  If you use the mouse, that breaks the streak.
+- Open source so you can be sure nothing is logging you keypresses
+- Uses a built-in macOS mechanism for key and mouse event capture that automatically exclude keypresses in password/secure fields
 - Push yourself to learn keyboard shortcuts for system wide (resize windows, app switching/navigation, all apps), -OR- focus/filter to only specific apps if that is more your jam
 
 ## License
