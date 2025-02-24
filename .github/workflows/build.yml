@@ -1,0 +1,16 @@
+name: Build
+on: [push, pull_request]
+jobs:
+  build:
+    name: Build
+    runs-on: macos-15
+    permissions:
+      checks: write
+      contents: read
+    env:
+      SCHEME: Keyjam
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build
+        run: xcodebuild build -scheme "$SCHEME" -skipPackagePluginValidation -skipMacroValidation
