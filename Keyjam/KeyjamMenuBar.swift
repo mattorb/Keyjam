@@ -25,117 +25,198 @@ struct KeyjamMenuBar: Scene {
     return "\(version)-\(build)"
   }
 
+  private var recentStreakEvents: [StreakEvent] {
+    keyCount.getRecentStreakEvents()
+  }
+
+  private var streakStats: String {
+    let events = recentStreakEvents
+    guard !events.isEmpty else { return "No recent streaks" }
+
+    let count = events.count
+    let maxStreak = events.map { $0.streakCount }.max() ?? 0
+    let avgStreak = events.reduce(0) { $0 + $1.streakCount } / count
+
+    return "\(count) streaks, max: \(maxStreak), avg: \(avgStreak)"
+  }
+
   var body: some Scene {
     MenuBarExtra {
       VStack(alignment: .leading) {
-        Text("Statistics")
-          .font(.headline)
-
-        Text("Current key streak: \(keyCount.keyCount)")
+        // Statistics section
+        statisticsSection
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        Text("Usage")
-          .font(.headline)
-
-        Text("Currently counting sequential keystrokes.  Using mouse will reset streak, and if >15 streak play a sad sound.")
+        // Usage section
+        usageSection
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        Text("Applications include filter")
-          .font(.headline)
-
-        if !trackedApps.isEmpty {
-          ForEach(trackedApps, id: \.self) { app in
-            HStack {
-              Text(app)
-              Spacer()
-              Button(action: {
-                trackedApps.removeAll { $0 == app }
-                coordinator.updateContext(appNames: trackedApps)
-              }) {
-                Image(systemName: "xmark.circle.fill")
-                  .foregroundColor(.red)
-              }
-              .buttonStyle(.plain)
-            }
-          }
-        }
-
-        HStack {
-          TextField(
-            "Add application named...", text: $newAppName,
-            onCommit: {
-              addApp()
-            })
-
-          Button(action: {
-            addApp()
-          }) {
-            Image(systemName: "plus.circle.fill")
-              .foregroundColor(.green)
-          }
-          .buttonStyle(.plain)
-          .disabled(newAppName.isEmpty)
-        }
+        // Applications section
+        applicationsSection
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        Text("Options")
-          .font(.headline)
-
-        Toggle(
-          "Key counting enabled",
-          isOn: .init(
-            get: { coordinator.isEnabled },
-            set: { coordinator.isEnabled = $0 }
-          ))
-
-        Toggle("Disable streak broken sound", isOn: $disableStreakBrokenSound)
-
-        Toggle("Launch automatically at login", isOn: $launchAtLogin)
-          .onChange(of: launchAtLogin) { previousValue, newValue in
-            if newValue, !previousValue {
-              do {
-                try SMAppService.mainApp.register()
-                print("Registered for Launch at Login")
-              } catch {
-                print("Failed to register: \(error)")
-              }
-            } else {
-              do {
-                try SMAppService.mainApp.unregister()
-              } catch {
-                print("Failed to deregister: \(error)")
-              }
-              print("Unregistered from Launch at Login")
-            }
-          }
-          .onAppear {
-            launchAtLogin = (SMAppService.mainApp.status == .enabled)
-          }
+        // Options section
+        optionsSection
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        HStack {
-          VStack {
-            Text("Keyjam version \(appVersion)")
-              .font(.headline)
-          }
-          Spacer()
-          Button("Quit") {
-            NSApplication.shared.terminate(nil)
-          }.keyboardShortcut("q")
-            .padding()
-        }
-
+        // Footer section
+        footerSection
       }
       .padding()
     } label: {
+      menuBarLabel
+    }
+    .menuBarExtraStyle(.window)
+  }
+
+  // MARK: - Menu Bar Sections
+
+  private var statisticsSection: some View {
+    VStack(alignment: .leading) {
+      Text("Statistics")
+        .font(.headline)
+
+      Text("Current key streak: \(keyCount.keyCount)")
+      Text(streakStats)
+        .font(.caption)
+        .foregroundColor(.secondary)
+
+      StreakChartView(streakEvents: recentStreakEvents)
+        .padding(.vertical, 5)
+    }
+  }
+
+  private var usageSection: some View {
+    VStack(alignment: .leading) {
+      Text("Usage")
+        .font(.headline)
+
+      Text("Currently counting sequential keystrokes.  Using mouse will reset streak, and if >15 streak play a sad sound.")
+    }
+  }
+
+  private var applicationsSection: some View {
+    VStack(alignment: .leading) {
+      Text("Applications include filter")
+        .font(.headline)
+
+      if !trackedApps.isEmpty {
+        ForEach(trackedApps, id: \.self) { app in
+          appRow(for: app)
+        }
+      }
+
+      addAppRow
+    }
+  }
+
+  private func appRow(for app: String) -> some View {
+    HStack {
+      Text(app)
+      Spacer()
+      Button(action: {
+        trackedApps.removeAll { $0 == app }
+        coordinator.updateContext(appNames: trackedApps)
+      }) {
+        Image(systemName: "xmark.circle.fill")
+          .foregroundColor(.red)
+      }
+      .buttonStyle(.plain)
+    }
+  }
+
+  private var addAppRow: some View {
+    HStack {
+      TextField(
+        "Add application named...", text: $newAppName,
+        onCommit: {
+          addApp()
+        })
+
+      Button(action: {
+        addApp()
+      }) {
+        Image(systemName: "plus.circle.fill")
+          .foregroundColor(.green)
+      }
+      .buttonStyle(.plain)
+      .disabled(newAppName.isEmpty)
+    }
+  }
+
+  private var optionsSection: some View {
+    VStack(alignment: .leading) {
+      Text("Options")
+        .font(.headline)
+
+      keyCountingToggle
+
+      Toggle("Disable streak broken sound", isOn: $disableStreakBrokenSound)
+
+      launchAtLoginToggle
+    }
+  }
+
+  private var keyCountingToggle: some View {
+    Toggle(
+      "Key counting enabled",
+      isOn: .init(
+        get: { coordinator.isEnabled },
+        set: { coordinator.isEnabled = $0 }
+      ))
+  }
+
+  private var launchAtLoginToggle: some View {
+    Toggle("Launch automatically at login", isOn: $launchAtLogin)
+      .onChange(of: launchAtLogin) { previousValue, newValue in
+        handleLaunchAtLoginChange(from: previousValue, to: newValue)
+      }
+      .onAppear {
+        launchAtLogin = (SMAppService.mainApp.status == .enabled)
+      }
+  }
+
+  private func handleLaunchAtLoginChange(from previousValue: Bool, to newValue: Bool) {
+    if newValue, !previousValue {
+      do {
+        try SMAppService.mainApp.register()
+        print("Registered for Launch at Login")
+      } catch {
+        print("Failed to register: \(error)")
+      }
+    } else {
+      do {
+        try SMAppService.mainApp.unregister()
+      } catch {
+        print("Failed to deregister: \(error)")
+      }
+      print("Unregistered from Launch at Login")
+    }
+  }
+
+  private var footerSection: some View {
+    HStack {
+      VStack {
+        Text("Keyjam version \(appVersion)")
+          .font(.headline)
+      }
+      Spacer()
+      Button("Quit") {
+        NSApplication.shared.terminate(nil)
+      }.keyboardShortcut("q")
+        .padding()
+    }
+  }
+
+  private var menuBarLabel: some View {
+    HStack {
       Image(systemName: "keyboard")
       Text("\(keyCount.keyCount)")
     }
-    .menuBarExtraStyle(.window)
   }
 
   private func addApp() {
