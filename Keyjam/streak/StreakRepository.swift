@@ -6,7 +6,8 @@ final class StreakRepository {
   private(set) var mouseBreak: Int = 0
   private(set) var streakEvents: [StreakEvent] = []
 
-  private let maxStoredEvents = 100
+  // Maximum age of stored events (one month)
+  private let maxEventAge: TimeInterval = 30 * 24 * 60 * 60  // 30 days in seconds
 
   init() {
     loadStreakEvents()
@@ -36,24 +37,29 @@ final class StreakRepository {
     let event = StreakEvent(streakCount: count)
     streakEvents.append(event)
 
-    // Limit the number of stored events
-    if streakEvents.count > maxStoredEvents {
-      streakEvents.sort { $0.timestamp > $1.timestamp }  // Sort by timestamp descending
-      streakEvents = Array(streakEvents.prefix(maxStoredEvents))
-    }
+    // Clean up old events
+    removeExpiredEvents()
 
     saveStreakEvents()
   }
 
+  private func removeExpiredEvents() {
+    let cutoffDate = Date().addingTimeInterval(-maxEventAge)
+    streakEvents = streakEvents.filter { $0.timestamp >= cutoffDate }
+  }
+
   private func loadStreakEvents() {
     streakEvents = FileManager.loadStreakEvents()
+
+    // Remove any expired events during load
+    removeExpiredEvents()
   }
 
   private func saveStreakEvents() {
     FileManager.saveStreakEvents(streakEvents)
   }
 
-  // Returns streak events for the last 7 days
+  // Returns streak events for the specified time period
   func getRecentStreakEvents(days: Int = 7) -> [StreakEvent] {
     let calendar = Calendar.current
     let startDate = calendar.date(byAdding: .day, value: -days, to: Date()) ?? Date()

@@ -6,6 +6,7 @@ struct KeyjamMenuBar: Scene {
   @Environment(StreakRepository.self) var keyCount
   @Environment(StreakCoordinator.self) var coordinator
 
+  @State private var selectedTimeScope: StreakChartTimeScope = .day
   @State private var launchAtLogin = false
   @State private var newAppName: String = ""
   @AppStorage(Settings.trackedApps) private var trackedApps: [String] = []
@@ -26,7 +27,18 @@ struct KeyjamMenuBar: Scene {
   }
 
   private var recentStreakEvents: [StreakEvent] {
-    keyCount.getRecentStreakEvents()
+    // Convert TimeScope to days for the repository method
+    let days: Int
+    switch selectedTimeScope {
+    case .day:
+      days = 1
+    case .week:
+      days = 7
+    case .month:
+      days = 30
+    }
+
+    return keyCount.getRecentStreakEvents(days: days)
   }
 
   private var streakStats: String {
@@ -80,12 +92,20 @@ struct KeyjamMenuBar: Scene {
       Text("Statistics")
         .font(.headline)
 
-      Text("Current key streak: \(keyCount.keyCount)")
+      HStack {
+        Text("Current key streak: \(keyCount.keyCount)")
+        Spacer()
+        if !recentStreakEvents.isEmpty {
+          Text("Highest: \(recentStreakEvents.map { $0.streakCount }.max() ?? 0)")
+            .foregroundColor(Color.teal)
+        }
+      }
+
       Text(streakStats)
         .font(.caption)
         .foregroundColor(.secondary)
 
-      StreakChartView(streakEvents: recentStreakEvents)
+      StreakChartView(streakEvents: recentStreakEvents, timeScope: $selectedTimeScope)
         .padding(.vertical, 5)
     }
   }

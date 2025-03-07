@@ -4,6 +4,7 @@ import SwiftUI
 // MARK: - Main View
 struct StreakChartView: View {
   let streakEvents: [StreakEvent]
+  @Binding var timeScope: StreakChartTimeScope
   @State private var selectedEvent: StreakEvent?
   @State private var hoverLocation: CGPoint?
   @State private var chartSize: CGSize = .zero
@@ -30,9 +31,15 @@ struct StreakChartView: View {
       Spacer()
 
       if !streakEvents.isEmpty {
-        Text("Highest: \(maxStreakCount)")
-          .font(.caption)
-          .foregroundColor(Color.teal)
+        Picker("", selection: $timeScope) {
+          ForEach(StreakChartTimeScope.allCases) { scope in
+            Text(scope.rawValue).tag(scope)
+          }
+        }
+        .pickerStyle(.menu)
+        .labelsHidden()
+        .frame(width: 70)
+        .controlSize(.small)
       }
     }
   }
@@ -401,19 +408,25 @@ enum TrendDirection {
   VStack(spacing: 20) {
     Text("Upward Trend")
       .font(.headline)
-    StreakChartView(streakEvents: createSampleData(startValue: 10, endValue: 50, count: 10, now: Date(), calendar: Calendar.current))
-      .padding()
-      .background(Color.primary.opacity(0.1))
-      .cornerRadius(8)
-      .shadow(radius: 2)
+    StreakChartView(
+      streakEvents: createSampleData(startValue: 10, endValue: 50, count: 10, now: Date(), calendar: Calendar.current),
+      timeScope: .constant(.day)
+    )
+    .padding()
+    .background(Color.primary.opacity(0.1))
+    .cornerRadius(8)
+    .shadow(radius: 2)
 
     Text("Downward Trend")
       .font(.headline)
-    StreakChartView(streakEvents: createSampleData(startValue: 50, endValue: 10, count: 10, now: Date(), calendar: Calendar.current))
-      .padding()
-      .background(Color.primary.opacity(0.1))
-      .cornerRadius(8)
-      .shadow(radius: 2)
+    StreakChartView(
+      streakEvents: createSampleData(startValue: 50, endValue: 10, count: 10, now: Date(), calendar: Calendar.current),
+      timeScope: .constant(.day)
+    )
+    .padding()
+    .background(Color.primary.opacity(0.1))
+    .cornerRadius(8)
+    .shadow(radius: 2)
   }
   .padding()
 }
@@ -440,4 +453,12 @@ private func createSampleData(
   }
 
   return sampleData.sorted { $0.timestamp < $1.timestamp }
+}
+
+enum StreakChartTimeScope: String, CaseIterable, Identifiable {
+  case day = "Day"
+  case week = "Week"
+  case month = "Month"
+
+  var id: String { rawValue }
 }
