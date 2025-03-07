@@ -94,8 +94,8 @@ struct KeyjamMenuBar: Scene {
     VStack(alignment: .leading) {
       Text("Usage")
         .font(.headline)
-
-      Text("Currently counting sequential keystrokes.  Using mouse will reset streak, and if >15 streak play a sad sound.")
+      Text("Currently counting sequential keystrokes. Using mouse will reset streak, and if >15 streak play a sad sound.")
+        .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)  // MenuBarExtra doesn't support multiline text issue
     }
   }
 
