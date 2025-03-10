@@ -48,7 +48,7 @@ final class StreakRepository {
     streakEvents = streakEvents.filter { $0.timestamp >= cutoffDate }
   }
 
-  private func loadStreakEvents() {
+  func loadStreakEvents() {
     streakEvents = FileManager.loadStreakEvents()
 
     // Remove any expired events during load

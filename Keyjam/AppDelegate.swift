@@ -10,6 +10,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ notification: Notification) {
     if !ProcessInfo.processInfo.isExecutingInXcodeSwiftUIPreview {
       preloadAudio()
+
+      guard let repository = DependencyContainer.shared.resolve(type: StreakRepository.self) else {
+        return
+      }
+
+      repository.loadSampleMonth()
+
       initializeStreakTracker()
     }
   }

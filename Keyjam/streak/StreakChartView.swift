@@ -164,17 +164,24 @@ struct StreakChartView: View {
   }
 
   private func configureChartAxis(dataSpansLessThanOneDay: Bool) -> some AxisContent {
-    if dataSpansLessThanOneDay {
+    switch timeScope {
+    case .day:
       return AxisMarks(preset: .aligned, values: .stride(by: .hour, count: 3)) {
         AxisGridLine()
         AxisTick()
         AxisValueLabel(format: .dateTime.hour(), anchor: .top)
       }
-    } else {
+    case .week:
       return AxisMarks(preset: .aligned, values: .stride(by: .day)) {
         AxisGridLine()
         AxisTick()
-        AxisValueLabel(format: .dateTime.day().month(), anchor: .top)
+        AxisValueLabel(format: .dateTime.weekday(.abbreviated), anchor: .top)
+      }
+    case .month:
+      return AxisMarks(preset: .aligned, values: .stride(by: .day, count: 3)) {
+        AxisGridLine()
+        AxisTick()
+        AxisValueLabel(format: .dateTime.month(.defaultDigits).day(), anchor: .top)
       }
     }
   }
@@ -406,10 +413,10 @@ enum TrendDirection {
 // MARK: - Preview
 #Preview(traits: .sizeThatFitsLayout) {
   VStack(spacing: 20) {
-    Text("Upward Trend")
+    Text("Download Trend over day")
       .font(.headline)
     StreakChartView(
-      streakEvents: createSampleData(startValue: 10, endValue: 50, count: 10, now: Date(), calendar: Calendar.current),
+      streakEvents: StreakRepository.createSampleData(startValue: 10, endValue: 50, count: 10, now: Date(), calendar: Calendar.current),
       timeScope: .constant(.day)
     )
     .padding()
@@ -417,11 +424,22 @@ enum TrendDirection {
     .cornerRadius(8)
     .shadow(radius: 2)
 
-    Text("Downward Trend")
+    Text("Upward Trend over week")
       .font(.headline)
     StreakChartView(
-      streakEvents: createSampleData(startValue: 50, endValue: 10, count: 10, now: Date(), calendar: Calendar.current),
+      streakEvents: StreakRepository.createSampleData(startValue: 50, endValue: 10, count: 10, now: Date(), calendar: Calendar.current),
       timeScope: .constant(.day)
+    )
+    .padding()
+    .background(Color.primary.opacity(0.1))
+    .cornerRadius(8)
+    .shadow(radius: 2)
+
+    Text("Busy Month")
+      .font(.headline)
+    StreakChartView(
+      streakEvents: StreakRepository.generateMonthOfDataWithUpwardTrend(),
+      timeScope: .constant(.month)
     )
     .padding()
     .background(Color.primary.opacity(0.1))
@@ -429,30 +447,6 @@ enum TrendDirection {
     .shadow(radius: 2)
   }
   .padding()
-}
-
-private func createSampleData(
-  startValue: Int,
-  endValue: Int,
-  count: Int,
-  now: Date,
-  calendar: Calendar
-) -> [StreakEvent] {
-  var sampleData: [StreakEvent] = []
-
-  let step = Double(endValue - startValue) / Double(count - 1)
-
-  for i in 0..<count {
-    if let timestamp = calendar.date(byAdding: .hour, value: -i, to: now) {
-      let trendValue = Double(startValue) + (step * Double(i))
-      let randomVariation = Double.random(in: -3...3)
-      let streak = max(4, Int(trendValue + randomVariation))
-
-      sampleData.append(StreakEvent(timestamp: timestamp, streakCount: streak))
-    }
-  }
-
-  return sampleData.sorted { $0.timestamp < $1.timestamp }
 }
 
 enum StreakChartTimeScope: String, CaseIterable, Identifiable {
