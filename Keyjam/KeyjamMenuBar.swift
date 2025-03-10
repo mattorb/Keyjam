@@ -46,10 +46,9 @@ struct KeyjamMenuBar: Scene {
     guard !events.isEmpty else { return "No recent streaks" }
 
     let count = events.count
-    let maxStreak = events.map { $0.streakCount }.max() ?? 0
     let avgStreak = events.reduce(0) { $0 + $1.streakCount } / count
 
-    return "\(count) streaks, max: \(maxStreak), avg: \(avgStreak)"
+    return "\(count) streaks, avg: \(avgStreak)"
   }
 
   var body: some Scene {
