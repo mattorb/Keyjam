@@ -4,7 +4,7 @@ Ever notice how satisfying it feels when you're absolutely crushing it on the [c
 
 Keyjam is a macOS status menu app that tracks your keyboard streaks, encouraging you to use your keyboard more and your mouse less.
 
-![KJ menu](https://github.com/user-attachments/assets/2d904af4-390f-4667-98ce-db31a72e2ef6)
+![KJ Menu](https://github.com/user-attachments/assets/fa793c29-2b43-4a54-89a5-92a49ef1b3e8)
 
 ## Features
 
