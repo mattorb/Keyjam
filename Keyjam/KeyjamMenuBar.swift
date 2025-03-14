@@ -9,6 +9,7 @@ struct KeyjamMenuBar: Scene {
   @State private var selectedTimeScope: StreakChartTimeScope = .day
   @State private var launchAtLogin = false
   @State private var newAppName: String = ""
+  @State private var hasInputPermission: Bool = false
   @AppStorage(Settings.trackedApps) private var trackedApps: [String] = []
   @AppStorage(Settings.disableStreakBrokenSound) private var disableStreakBrokenSound: Bool = false
 
@@ -66,6 +67,10 @@ struct KeyjamMenuBar: Scene {
 
         Spacer(minLength: Layout.verticalSpacer)
 
+        permissionSection
+
+        Spacer(minLength: Layout.verticalSpacer)
+
         optionsSection
 
         Spacer(minLength: Layout.verticalSpacer)
@@ -77,6 +82,9 @@ struct KeyjamMenuBar: Scene {
         footerSection
       }
       .padding()
+      .onAppear {
+        hasInputPermission = CGPreflightListenEventAccess()
+      }
     } label: {
       menuBarLabel
     }
@@ -166,12 +174,50 @@ struct KeyjamMenuBar: Scene {
     }
   }
 
+  private let accessibilityPermissionURL = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
+
+  private var permissionSection: some View {
+    VStack(alignment: .leading) {
+      Text("Permissions")
+        .font(.headline)
+
+      if !hasInputPermission {
+        HStack {
+          Image(systemName: "exclamationmark.circle.fill")
+            .foregroundColor(.red)
+          Text("Needs permission")
+          Spacer()
+          Button("Open Settings") {
+            NSWorkspace.shared.open(accessibilityPermissionURL)
+          }
+          .buttonStyle(.link)
+        }
+        .padding(.bottom, 4)
+        Text("Relaunch after granting permission")
+      } else {
+        HStack {
+          Image(systemName: "checkmark.circle.fill")
+            .foregroundColor(.green)
+          Text("System permission granted")
+          Button("here") {
+            NSWorkspace.shared.open(accessibilityPermissionURL)
+          }
+          .buttonStyle(.link)
+          Spacer()
+        }
+        .padding(.bottom, 4)
+      }
+    }
+  }
+
   private var optionsSection: some View {
     VStack(alignment: .leading) {
       Text("Options")
         .font(.headline)
 
-      keyCountingToggle
+      if hasInputPermission {
+        keyCountingToggle
+      }
 
       Toggle("Disable streak broken sound", isOn: $disableStreakBrokenSound)
 

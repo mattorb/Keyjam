@@ -39,11 +39,9 @@ final class StreakCoordinator {
   var isEnabled: Bool = true {
     didSet {
       if isEnabled {
-        keyboardMonitor.start()
-        mouseMonitor.start()
+        start()
       } else {
-        keyboardMonitor.stop()
-        mouseMonitor.stop()
+        stop()
       }
     }
   }
@@ -116,9 +114,20 @@ final class StreakCoordinator {
     }
 
     setupSubscriptions()
-    keyboardMonitor.start()
-    mouseMonitor.start()
-    state = .started
+
+    let keyMonitorStarted = keyboardMonitor.start()
+    let mouseMonitorStarted = mouseMonitor.start()
+
+    if keyMonitorStarted && mouseMonitorStarted {
+      state = .started
+    } else {
+      stop()
+    }
+  }
+
+  func stop() {
+    keyboardMonitor.stop()
+    mouseMonitor.stop()
   }
 
   func updateContext(appNames: [String]) {

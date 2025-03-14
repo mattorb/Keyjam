@@ -6,7 +6,7 @@ class MouseMonitor: InputMonitor {
   let eventPublisher = PassthroughSubject<StreakInEvent, Never>()
   private var eventTap: CFMachPort?
 
-  func start() {
+  func start() -> Bool {
     let eventMask: CGEventMask =
       (1 << CGEventType.mouseMoved.rawValue) | (1 << CGEventType.leftMouseDragged.rawValue) | (1 << CGEventType.rightMouseDragged.rawValue)
 
@@ -27,7 +27,7 @@ class MouseMonitor: InputMonitor {
         userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
       )
     else {
-      fatalError("Failed to create mouse event tap")
+      return false
     }
 
     self.eventTap = eventTap
@@ -36,6 +36,8 @@ class MouseMonitor: InputMonitor {
     CFRunLoopAddSource(
       CFRunLoopGetCurrent(), runLoopSource, .commonModes)
     CGEvent.tapEnable(tap: eventTap, enable: true)
+
+    return true
   }
 
   func stop() {

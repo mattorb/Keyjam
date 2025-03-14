@@ -6,7 +6,7 @@ class KeyboardMonitor: InputMonitor {
   let eventPublisher = PassthroughSubject<StreakInEvent, Never>()
   private var eventTap: CFMachPort?
 
-  func start() {
+  func start() -> Bool {
     let eventMask = (1 << CGEventType.keyDown.rawValue)
     guard
       let eventTap = CGEvent.tapCreate(
@@ -33,7 +33,7 @@ class KeyboardMonitor: InputMonitor {
         userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
       )
     else {
-      fatalError("Failed to create key event tap")
+      return false
     }
 
     self.eventTap = eventTap
@@ -42,6 +42,8 @@ class KeyboardMonitor: InputMonitor {
     CFRunLoopAddSource(
       CFRunLoopGetCurrent(), runLoopSource, .commonModes)
     CGEvent.tapEnable(tap: eventTap, enable: true)
+
+    return true
   }
 
   func stop() {
