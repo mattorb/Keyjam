@@ -54,27 +54,26 @@ struct KeyjamMenuBar: Scene {
   var body: some Scene {
     MenuBarExtra {
       VStack(alignment: .leading) {
-        // Statistics section
         statisticsSection
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        // Usage section
         usageSection
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        // Applications section
         applicationsSection
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        // Options section
         optionsSection
 
         Spacer(minLength: Layout.verticalSpacer)
 
-        // Footer section
+        dataSection
+
+        Spacer(minLength: Layout.verticalSpacer)
+
         footerSection
       }
       .padding()
@@ -177,6 +176,20 @@ struct KeyjamMenuBar: Scene {
       Toggle("Disable streak broken sound", isOn: $disableStreakBrokenSound)
 
       launchAtLoginToggle
+    }
+  }
+
+  private var dataSection: some View {
+    VStack(alignment: .leading) {
+      Text("Data")
+        .font(.headline)
+
+      HStack {
+        Button("Clear streak history", role: .destructive) {
+          keyCount.clearAllData()
+        }
+        Spacer()
+      }
     }
   }
 

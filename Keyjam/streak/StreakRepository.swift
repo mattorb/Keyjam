@@ -70,4 +70,10 @@ final class StreakRepository {
       .filter { $0.timestamp >= startDate }
       .sorted { $0.timestamp < $1.timestamp }
   }
+
+  func clearAllData() {
+    keyCount = 0
+    streakEvents = []
+    saveStreakEvents()
+  }
 }
